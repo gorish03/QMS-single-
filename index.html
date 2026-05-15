@@ -122,6 +122,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   font-size:13px;
   letter-spacing:.04em;
   text-transform:uppercase;
+  border-radius:50px;
   transition:background .3s,transform .3s var(--ease);
   display:inline-flex;align-items:center;gap:10px;
 }
@@ -150,14 +151,19 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   z-index:0;
 }
 .hero-bg img{
+  position:absolute;
+  inset:0;
   width:100%;height:100%;
   object-fit:cover;
-  opacity:.45;
-  transform:scale(1.05);
-  transition:transform 12s linear;
-  filter:saturate(.8) contrast(1.05);
+  opacity:0;
+  transform:scale(1.08);
+  filter:saturate(.75) contrast(1.1);
+  transition:opacity 1.8s ease, transform 12s linear;
 }
-.hero.loaded .hero-bg img{transform:scale(1)}
+.hero-bg img.bg-active{
+  opacity:.48;
+  transform:scale(1);
+}
 .hero-bg::after{
   content:"";
   position:absolute;inset:0;
@@ -250,27 +256,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   color:rgba(255,255,255,.6);
   margin-top:8px;
 }
-.hero-scroll{
-  position:absolute;
-  bottom:30px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:3;
-  font-size:11px;
-  letter-spacing:.3em;
-  text-transform:uppercase;
-  color:rgba(255,255,255,.5);
-  display:flex;flex-direction:column;align-items:center;gap:14px;
-  opacity:0;
-  animation:fadeIn 1s var(--ease) 1.6s forwards;
-}
-.hero-scroll::after{
-  content:"";
-  width:1px;height:50px;
-  background:linear-gradient(to bottom,var(--orange-bright),transparent);
-  animation:scrollLine 2s ease-in-out infinite;
-}
-@keyframes scrollLine{0%,100%{transform:scaleY(.4);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}}
 @keyframes rise-up{to{transform:translateY(0)}}
 @keyframes rise{to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{to{opacity:1}}
@@ -1130,6 +1115,144 @@ footer{
 
 /* selection */
 ::selection{background:var(--orange);color:#fff}
+
+/* ===== CAROUSEL DOPAMINE PACK ===== */
+
+/* Perspective for 3D tilt */
+.carousel-viewport{
+  perspective:1400px;
+  perspective-origin:50% 50%;
+}
+.carousel-card{
+  transform-style:preserve-3d;
+}
+
+/* Shimmer sweep on card entrance */
+.carousel-card .card-shimmer{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(108deg,
+    transparent 35%,
+    rgba(255,138,43,.22) 50%,
+    rgba(255,255,255,.08) 55%,
+    transparent 65%);
+  transform:translateX(-130%);
+  pointer-events:none;
+  z-index:12;
+  border-radius:inherit;
+}
+.carousel-card.active.do-shimmer .card-shimmer{
+  animation:shimmer-sweep .75s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes shimmer-sweep{
+  0%  {transform:translateX(-130%)}
+  100%{transform:translateX(160%)}
+}
+
+/* Active card glow ring */
+.carousel-card.active{
+  box-shadow:
+    0 0 0 1px rgba(244,121,32,.45),
+    0 0 40px rgba(244,121,32,.08),
+    0 40px 100px rgba(0,0,0,.55);
+}
+
+/* Flash overlay on the viewport */
+.carousel-flash{
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse 60% 60% at 50% 50%,
+    rgba(244,121,32,.28),
+    transparent 70%);
+  pointer-events:none;
+  opacity:0;
+  z-index:30;
+}
+
+/* Dot navigation */
+.carousel-dots{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:center;
+  padding-top:36px;
+}
+.cdot{
+  width:9px;height:9px;
+  border-radius:50%;
+  background:rgba(255,255,255,.18);
+  border:none;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition:width .45s cubic-bezier(.7,.05,.15,1),
+             background .45s cubic-bezier(.7,.05,.15,1),
+             border-radius .45s cubic-bezier(.7,.05,.15,1),
+             transform .2s ease;
+  padding:0;
+}
+.cdot:hover{transform:scale(1.3);background:rgba(255,255,255,.38)}
+.cdot.active{
+  width:36px;
+  border-radius:5px;
+  background:var(--orange-bright);
+  transform:scale(1);
+}
+.cdot.active::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,
+    transparent,
+    rgba(255,255,255,.5),
+    transparent);
+  animation:dot-shine .55s ease-out forwards;
+}
+@keyframes dot-shine{
+  from{transform:translateX(-200%)}
+  to  {transform:translateX(200%)}
+}
+/* Ripple on arrow click */
+.car-arrow{
+  overflow:hidden;
+  position:relative;
+}
+.car-arrow .ripple{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(244,121,32,.45);
+  width:8px;height:8px;
+  margin:-4px;
+  pointer-events:none;
+  animation:ripple-out .55s ease-out forwards;
+}
+@keyframes ripple-out{
+  to{transform:scale(12);opacity:0}
+}
+
+/* Floating number badge on active card */
+.card-badge{
+  position:absolute;
+  top:28px;right:28px;
+  background:rgba(14,14,16,.7);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(244,121,32,.3);
+  border-radius:50px;
+  padding:7px 16px;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.08em;
+  color:rgba(255,255,255,.7);
+  z-index:8;
+  opacity:0;
+  transform:translateY(-8px);
+  transition:opacity .5s .6s var(--ease-out),transform .5s .6s var(--ease-out);
+}
+.card-badge span{color:var(--orange-bright);font-family:var(--display);font-size:15px;font-weight:300}
+.carousel-card.active .card-badge{
+  opacity:1;
+  transform:translateY(0);
+}
 </style>
 </head>
 <body>
@@ -1153,8 +1276,13 @@ footer{
 
 <!-- ===== HERO ===== -->
 <section class="hero" id="hero">
-  <div class="hero-bg">
-    <img src="https://images.unsplash.com/photo-1565793979206-6d8fbb7f5e90?w=1920&q=80&auto=format&fit=crop" alt="Industrial facility" />
+  <div class="hero-bg" id="heroBg">
+    <img src="https://images.unsplash.com/photo-1565793979206-6d8fbb7f5e90?w=1920&q=80&auto=format&fit=crop" alt="Industrial facility" class="bg-active" />
+    <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&q=80&auto=format&fit=crop" alt="Safety audit inspection" />
+    <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=1920&q=80&auto=format&fit=crop" alt="Energy plant infrastructure" />
+    <img src="https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=1920&q=80&auto=format&fit=crop" alt="HSE safety operations" />
+    <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1920&q=80&auto=format&fit=crop" alt="Industrial testing equipment" />
+    <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920&q=80&auto=format&fit=crop" alt="Engineering and manufacturing" />
   </div>
   <div class="hero-inner">
     <div>
@@ -1173,7 +1301,7 @@ footer{
       <div class="label">India-wide footprint</div>
     </div>
   </div>
-  <div class="hero-scroll">Scroll<br/></div>
+
 </section>
 
 <!-- ===== TICKER ===== -->
@@ -1242,10 +1370,13 @@ footer{
   </div>
 
   <div class="carousel-viewport" id="carouselViewport">
+    <div class="carousel-flash" id="carouselFlash"></div>
     <div class="carousel-track" id="carouselTrack">
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&q=80&auto=format&fit=crop" alt="ISO consulting" />
+        <div class="card-shimmer"></div>
+        <div class="card-badge"><span>20+</span> Standards</div>
         <div class="carousel-card-overlay">
           <div class="carousel-card-num">01 — CONSULTING</div>
           <h3 class="carousel-card-title">ISO &amp; Sustainability Consulting</h3>
@@ -1256,6 +1387,8 @@ footer{
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=800&q=80&auto=format&fit=crop" alt="HSE safety audits" />
+        <div class="card-shimmer"></div>
+        <div class="card-badge"><span>HAZOP</span> / QRA Ready</div>
         <div class="carousel-card-overlay">
           <div class="carousel-card-num">02 — HSE</div>
           <h3 class="carousel-card-title">Health, Safety &amp; Environment</h3>
@@ -1266,6 +1399,8 @@ footer{
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80&auto=format&fit=crop" alt="Non-destructive testing" />
+        <div class="card-shimmer"></div>
+        <div class="card-badge"><span>NABL</span> Accredited Lab</div>
         <div class="carousel-card-overlay">
           <div class="carousel-card-num">03 — NDT</div>
           <h3 class="carousel-card-title">Non-Destructive Testing</h3>
@@ -1276,6 +1411,8 @@ footer{
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&q=80&auto=format&fit=crop" alt="Energy audits" />
+        <div class="card-shimmer"></div>
+        <div class="card-badge"><span>BEE</span> PAT Scheme</div>
         <div class="carousel-card-overlay">
           <div class="carousel-card-num">04 — ENERGY</div>
           <h3 class="carousel-card-title">Energy &amp; Decarbonisation</h3>
@@ -1286,6 +1423,8 @@ footer{
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80&auto=format&fit=crop" alt="Custom software" />
+        <div class="card-shimmer"></div>
+        <div class="card-badge"><span>EHS</span> SaaS Suite</div>
         <div class="carousel-card-overlay">
           <div class="carousel-card-num">05 — IT &amp; IoT</div>
           <h3 class="carousel-card-title">Custom Software &amp; IoT</h3>
@@ -1296,6 +1435,8 @@ footer{
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?w=800&q=80&auto=format&fit=crop" alt="Biodiversity surveys" />
+        <div class="card-shimmer"></div>
+        <div class="card-badge"><span>BRSR</span> Aligned</div>
         <div class="carousel-card-overlay">
           <div class="carousel-card-num">06 — ESG &amp; OTHER</div>
           <h3 class="carousel-card-title">ESG, Biodiversity &amp; Social Impact</h3>
@@ -1314,6 +1455,7 @@ footer{
       <button class="car-arrow" id="nextBtn" aria-label="Next">→</button>
     </div>
   </div>
+  <div class="carousel-dots" id="carouselDots"></div>
 </section>
 
 <!-- ===== SPLIT SCREEN FEATURE BLOCKS ===== -->
@@ -1589,7 +1731,7 @@ window.addEventListener('scroll',()=>{
   nav.classList.toggle('dark',inDark);
 },{passive:true});
 
-/* mark hero loaded for slow zoom */
+/* mark hero loaded */
 window.addEventListener('load',()=>hero.classList.add('loaded'));
 
 /* ============================================================
@@ -1652,46 +1794,88 @@ const statObserver=new IntersectionObserver((entries)=>{
 document.querySelectorAll('.stat-num[data-count]').forEach(el=>statObserver.observe(el));
 
 /* ============================================================
-   5. INFINITE CENTER-MODE CAROUSEL
+   5. INFINITE CENTER-MODE CAROUSEL — ENHANCED
 ============================================================ */
 const track = document.getElementById('carouselTrack');
 const viewport = document.getElementById('carouselViewport');
+const flashEl = document.getElementById('carouselFlash');
 const originalCards = Array.from(document.querySelectorAll('.carousel-card'));
 const totalOriginal = originalCards.length;
 
-// 1. Clone cards to create the "never-ending" loop illusion
+// Clone cards to create the "never-ending" loop illusion
 const clonesBefore = 3;
 const clonesAfter = 3;
 
-// Clone the last 3 cards and put them at the start
 for (let i = totalOriginal - clonesBefore; i < totalOriginal; i++) {
   let clone = originalCards[i].cloneNode(true);
   track.insertBefore(clone, track.firstChild);
 }
-// Clone the first 3 cards and put them at the end
 for (let i = 0; i < clonesAfter; i++) {
   let clone = originalCards[i].cloneNode(true);
   track.appendChild(clone);
 }
 
 const cards = document.querySelectorAll('.carousel-card');
-let activeIdx = clonesBefore; // Start at the first real card
+let activeIdx = clonesBefore;
 
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const progressBar = document.getElementById('progressBar');
+const dotsContainer = document.getElementById('carouselDots');
 
+// Build dot nav
+const dotEls = [];
+for (let i = 0; i < totalOriginal; i++) {
+  const d = document.createElement('button');
+  d.className = 'cdot';
+  d.setAttribute('aria-label', `Go to slide ${i+1}`);
+  d.addEventListener('click', () => goTo(i + clonesBefore));
+  dotsContainer.appendChild(d);
+  dotEls.push(d);
+}
 
 let isAnimating = false;
 
+// ── Flash helper ──────────────────────────────────────────
+function triggerFlash() {
+  flashEl.style.transition = 'none';
+  flashEl.style.opacity = '1';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      flashEl.style.transition = 'opacity .55s ease-out';
+      flashEl.style.opacity = '0';
+    });
+  });
+}
+
+// ── Shimmer helper ────────────────────────────────────────
+function triggerShimmer(card) {
+  card.classList.remove('do-shimmer');
+  void card.offsetWidth; // reflow to restart animation
+  card.classList.add('do-shimmer');
+}
+
+// ── Ripple on buttons ─────────────────────────────────────
+function addRipple(btn, e) {
+  const r = document.createElement('span');
+  r.className = 'ripple';
+  const rect = btn.getBoundingClientRect();
+  r.style.left = (e.clientX - rect.left) + 'px';
+  r.style.top  = (e.clientY - rect.top)  + 'px';
+  btn.appendChild(r);
+  setTimeout(() => r.remove(), 600);
+}
+prevBtn.addEventListener('click', e => addRipple(prevBtn, e));
+nextBtn.addEventListener('click', e => addRipple(nextBtn, e));
+
+// ── Update carousel state ─────────────────────────────────
 function updateCarousel(instant = false) {
-  // If 'instant' is true, we disable transitions for the silent teleport
   if (instant) {
     track.style.transition = 'none';
-    cards.forEach(c => c.style.transition = 'none'); 
+    cards.forEach(c => c.style.transition = 'none');
   } else {
     track.style.transition = 'transform .8s var(--ease-out)';
-    cards.forEach(c => c.style.transition = ''); // Restores CSS transitions
+    cards.forEach(c => c.style.transition = '');
   }
 
   const card = cards[0];
@@ -1699,41 +1883,47 @@ function updateCarousel(instant = false) {
   const cardW = card.offsetWidth;
   const viewW = viewport.offsetWidth;
   const offset = (viewW - cardW) / 2;
-  
+
   track.style.padding = `0 ${offset}px`;
   track.style.transform = `translateX(${-activeIdx * (cardW + gap)}px)`;
 
+  // Reset tilt on all cards before re-activating
+  cards.forEach(c => { c.style.transform = ''; });
+
   cards.forEach((c, i) => {
     c.classList.remove('active', 'adjacent');
-    if (i === activeIdx) c.classList.add('active');
-    else if (Math.abs(i - activeIdx) === 1) c.classList.add('adjacent');
+    if (i === activeIdx) {
+      c.classList.add('active');
+      if (!instant) triggerShimmer(c);
+    } else if (Math.abs(i - activeIdx) === 1) {
+      c.classList.add('adjacent');
+    }
   });
 
-  // Map the infinite index back to 1-6 for the UI counter and progress bar
   let realIdx = (activeIdx - clonesBefore) % totalOriginal;
   if (realIdx < 0) realIdx += totalOriginal;
 
-
+  // Update progress bar
   progressBar.style.width = ((realIdx + 1) / totalOriginal * 100) + '%';
-  
-  // Buttons are never disabled in an infinite loop
+
+  // Update dots
+  dotEls.forEach((d, i) => {
+    d.classList.toggle('active', i === realIdx);
+  });
+
   prevBtn.disabled = false;
   nextBtn.disabled = false;
 }
 
 function goTo(i) {
-  // Prevent rapid clicks from breaking the illusion
   if (isAnimating) return;
   activeIdx = i;
   updateCarousel();
+  if (!isAnimating) triggerFlash();
 
   isAnimating = true;
-  
-  // Wait for the CSS transition (.8s) to finish before checking if we need to teleport
   setTimeout(() => {
     isAnimating = false;
-    
-    // The Magic Trick: Silently jump back to the real cards if we hit a cloned boundary
     if (activeIdx >= totalOriginal + clonesBefore) {
       activeIdx -= totalOriginal;
       updateCarousel(true);
@@ -1741,7 +1931,7 @@ function goTo(i) {
       activeIdx += totalOriginal;
       updateCarousel(true);
     }
-  }, 800); 
+  }, 800);
 }
 
 prevBtn.addEventListener('click', () => goTo(activeIdx - 1));
@@ -1754,33 +1944,33 @@ cards.forEach((c, i) => c.addEventListener('click', () => {
 /* keyboard */
 document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') goTo(activeIdx + 1);
-  if (e.key === 'ArrowLeft') goTo(activeIdx - 1);
+  if (e.key === 'ArrowLeft')  goTo(activeIdx - 1);
 });
 
 /* swipe / drag */
 let startX = 0, isDown = false, moved = 0;
-viewport.addEventListener('mousedown', e => { isDown = true; startX = e.clientX; moved = 0; });
-viewport.addEventListener('mousemove', e => { if (isDown) moved = e.clientX - startX; });
-viewport.addEventListener('mouseup', () => {
+viewport.addEventListener('mousedown',  e => { isDown = true; startX = e.clientX; moved = 0; });
+viewport.addEventListener('mousemove',  e => { if (isDown) moved = e.clientX - startX; });
+viewport.addEventListener('mouseup',    () => {
   if (!isDown) return;
   isDown = false;
-  if (moved < -50) goTo(activeIdx + 1);
-  else if (moved > 50) goTo(activeIdx - 1);
+  if (moved < -50)      goTo(activeIdx + 1);
+  else if (moved > 50)  goTo(activeIdx - 1);
 });
 viewport.addEventListener('mouseleave', () => { isDown = false; });
 
-viewport.addEventListener('touchstart', e => { startX = e.touches[0].clientX; moved = 0; }, { passive: true });
-viewport.addEventListener('touchmove', e => { moved = e.touches[0].clientX - startX; }, { passive: true });
-viewport.addEventListener('touchend', () => {
-  if (moved < -50) goTo(activeIdx + 1);
-  else if (moved > 50) goTo(activeIdx - 1);
+viewport.addEventListener('touchstart', e => { startX = e.touches[0].clientX; moved = 0; }, { passive:true });
+viewport.addEventListener('touchmove',  e => { moved = e.touches[0].clientX - startX; },    { passive:true });
+viewport.addEventListener('touchend',   () => {
+  if (moved < -50)      goTo(activeIdx + 1);
+  else if (moved > 50)  goTo(activeIdx - 1);
 });
 
 /* resize */
 let rt;
 window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => updateCarousel(true), 150); });
 
-/* auto-advance (seamless loop every 4.5s) */
+/* auto-advance */
 let auto = setInterval(() => goTo(activeIdx + 1), 4500);
 viewport.addEventListener('mouseenter', () => clearInterval(auto));
 viewport.addEventListener('mouseleave', () => {
@@ -1788,17 +1978,96 @@ viewport.addEventListener('mouseleave', () => {
   auto = setInterval(() => goTo(activeIdx + 1), 4500);
 });
 
-/* init without animation on load */
+/* init */
 setTimeout(() => updateCarousel(true), 80);
 
+/* ── 3D TILT on active card ───────────────────────────── */
+let tiltRAF = null;
+let targetRotX = 0, targetRotY = 0;
+let currentRotX = 0, currentRotY = 0;
+
+viewport.addEventListener('mousemove', e => {
+  if (isDown) return;                    // don't tilt while dragging
+  const activeCard = cards[activeIdx];
+  if (!activeCard) return;
+
+  const rect = activeCard.getBoundingClientRect();
+  // Only tilt when hovering the active card area
+  const inCard = e.clientX > rect.left - 60 && e.clientX < rect.right + 60
+              && e.clientY > rect.top  - 60 && e.clientY < rect.bottom + 60;
+  if (!inCard) return;
+
+  const dx = (e.clientX - (rect.left + rect.width  / 2)) / (rect.width  / 2);
+  const dy = (e.clientY - (rect.top  + rect.height / 2)) / (rect.height / 2);
+
+  targetRotY =  dx * 10;   // max ±10deg horizontal
+  targetRotX = -dy * 6;    // max ±6deg vertical
+
+  if (!tiltRAF) tiltRAF = requestAnimationFrame(tiltLoop);
+});
+
+viewport.addEventListener('mouseleave', () => {
+  targetRotX = 0;
+  targetRotY = 0;
+  if (!tiltRAF) tiltRAF = requestAnimationFrame(tiltLoop);
+});
+
+function tiltLoop() {
+  const ease = 0.1;
+  currentRotX += (targetRotX - currentRotX) * ease;
+  currentRotY += (targetRotY - currentRotY) * ease;
+
+  const activeCard = cards[activeIdx];
+  if (activeCard) {
+    activeCard.style.transform =
+      `scale(1) rotateX(${currentRotX.toFixed(3)}deg) rotateY(${currentRotY.toFixed(3)}deg)`;
+  }
+
+  const stillMoving = Math.abs(targetRotX - currentRotX) > 0.01
+                   || Math.abs(targetRotY - currentRotY) > 0.01;
+  if (stillMoving) {
+    tiltRAF = requestAnimationFrame(tiltLoop);
+  } else {
+    tiltRAF = null;
+    if (activeCard) activeCard.style.transform = '';
+  }
+}
+
+/* ── Magnetic arrow buttons ───────────────────────────── */
+[prevBtn, nextBtn].forEach(btn => {
+  btn.addEventListener('mousemove', e => {
+    const rect = btn.getBoundingClientRect();
+    const cx = rect.left + rect.width  / 2;
+    const cy = rect.top  + rect.height / 2;
+    const dx = (e.clientX - cx) * 0.28;
+    const dy = (e.clientY - cy) * 0.28;
+    btn.style.transform = `translate(${dx}px, ${dy}px) scale(1.08)`;
+  });
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = '';
+  });
+});
+
 /* ============================================================
-   6. PARALLAX (subtle) on hero bg image
+   6. HERO BACKGROUND SLIDESHOW
 ============================================================ */
-const heroImg=document.querySelector('.hero-bg img');
+const bgImgs = document.querySelectorAll('.hero-bg img');
+let bgIdx = 0;
+function rotateBg() {
+  bgImgs[bgIdx].classList.remove('bg-active');
+  bgIdx = (bgIdx + 1) % bgImgs.length;
+  bgImgs[bgIdx].classList.add('bg-active');
+}
+setInterval(rotateBg, 5000);
+
+/* subtle parallax on active hero img */
 window.addEventListener('scroll',()=>{
   const y=window.scrollY;
   if(y<window.innerHeight){
-    heroImg.style.transform=`scale(1.05) translateY(${y*0.25}px)`;
+    bgImgs.forEach(img=>{
+      img.style.transform=`scale(1.08) translateY(${y*0.18}px)`;
+    });
+    bgImgs[bgIdx].style.transform=`scale(1) translateY(${y*0.18}px)`;
   }
 },{passive:true});
 
